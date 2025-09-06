@@ -12,6 +12,7 @@
             background-color: #f3f4f6;
             color: #374151;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -32,6 +33,7 @@
             border-radius: 16px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
+            position: relative; /* Needed for positioning delete button */
         }
         .planner-item.completed {
             background-color: #d1fae5;
@@ -43,6 +45,7 @@
             font-style: italic;
         }
         .item-text {
+            flex-grow: 1;
             font-size: 1.25rem;
             font-weight: 600;
             margin-left: 1.25rem;
@@ -78,21 +81,20 @@
             z-index: 999;
             display: none;
         }
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: #2563eb;
-            animation: spin 1s ease infinite;
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: #6b7280;
+            transition: color 0.2s ease;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .icon-btn:hover {
+            color: #1f2937;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
 
     <div class="modal-overlay" id="modal-overlay"></div>
     <div class="custom-modal" id="custom-modal">
@@ -103,47 +105,45 @@
     <div class="w-full max-w-xl bg-white p-8 rounded-3xl shadow-xl">
         <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-6">Daily Planner</h1>
 
-        <!-- Loading state -->
-        <div id="loading-container" class="flex flex-col items-center justify-center py-12 hidden">
-            <div id="loading-spinner" class="loading-spinner"></div>
-            <span id="loading-text" class="mt-4 text-gray-500">Updating Google Sheet...</span>
+        <!-- Date Navigation -->
+        <div class="flex justify-between items-center mb-6 px-4">
+            <button id="prev-day" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <h2 id="current-date" class="text-2xl font-bold text-gray-700"></h2>
+            <button id="next-day" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Add Task Section -->
+        <div class="flex mb-6 px-4 gap-2">
+            <input id="new-task-input" type="text" placeholder="Add a new task..." class="flex-grow p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition-colors">
+            <button id="add-task-btn" class="p-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors">Add</button>
         </div>
 
         <!-- Planner list -->
         <ul id="planner-list" class="planner-list">
-            <li class="planner-item" data-task-id="gym">
-                <input type="checkbox" class="check-box">
-                <span class="item-text">1 hour in the gym</span>
-            </li>
-            <li class="planner-item" data-task-id="cooking_eating">
-                <input type="checkbox" class="check-box">
-                <span class="item-text">1 hour cooking and eating</span>
-            </li>
-            <li class="planner-item" data-task-id="personal_project">
-                <input type="checkbox" class="check-box">
-                <span class="item-text">2 hours personal project</span>
-            </li>
-            <li class="planner-item" data-task-id="office_work">
-                <input type="checkbox" class="check-box">
-                <span class="item-text">3 hours office deep work</span>
-            </li>
-            <li class="planner-item" data-task-id="spirituality">
-                <input type="checkbox" class="check-box">
-                <span class="item-text">1 hour on spirituality</span>
-            </li>
-            <li class="planner-item" data-task-id="sleep">
-                <input type="checkbox" class="check-box">
-                <span class="item-text">7 hours of sleep</span>
-            </li>
+            <!-- Tasks will be dynamically added here -->
         </ul>
     </div>
 
-    <script>
-        // TODO: Replace this with your Node.js service's URL after deployment.
-        const SERVICE_URL = "YOUR_SERVICE_URL_HERE";
+    <!-- Footer -->
+    <footer class="w-full max-w-xl text-center text-gray-500 text-sm mt-8">
+        © 2024 Daily Planner. All rights reserved.
+    </footer>
 
+    <script>
         const plannerList = document.getElementById('planner-list');
-        const loadingContainer = document.getElementById('loading-container');
+        const currentDateEl = document.getElementById('current-date');
+        const prevDayBtn = document.getElementById('prev-day');
+        const nextDayBtn = document.getElementById('next-day');
+        const newTaskInput = document.getElementById('new-task-input');
+        const addTaskBtn = document.getElementById('add-task-btn');
         const customModal = document.getElementById('custom-modal');
         const modalOverlay = document.getElementById('modal-overlay');
         const modalMessage = document.getElementById('modal-message');
@@ -160,62 +160,219 @@
             modalOverlay.style.display = 'none';
         });
 
-        // Function to send data to the Node.js service
-        async function updateGoogleSheet(taskId, isCompleted) {
-            if (SERVICE_URL === "YOUR_SERVICE_URL_HERE") {
-                showMessage("Service URL is not configured. Please follow the setup instructions.");
-                return;
-            }
+        // Local storage keys
+        const LOCAL_STORAGE_TASK_KEY = 'daily-planner-tasks';
+        const LOCAL_STORAGE_HISTORY_KEY = 'daily-planner-history';
 
-            loadingContainer.classList.remove('hidden');
+        // Predefined tasks for the first time the app is loaded
+        const defaultTasks = [];
 
+        let currentDate = new Date();
+        let tasks = [];
+
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function saveState() {
             try {
-                const response = await fetch(SERVICE_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ taskId, isCompleted })
+                // Save the current list of tasks
+                localStorage.setItem(LOCAL_STORAGE_TASK_KEY, JSON.stringify(tasks));
+
+                // Save the completion history
+                const historyJSON = localStorage.getItem(LOCAL_STORAGE_HISTORY_KEY);
+                const history = historyJSON ? JSON.parse(historyJSON) : {};
+                const dateKey = currentDate.toISOString().slice(0, 10);
+                const currentState = {};
+                const items = plannerList.querySelectorAll('.planner-item');
+                items.forEach(item => {
+                    const taskId = item.dataset.taskId;
+                    const checkbox = item.querySelector('.check-box');
+                    currentState[taskId] = checkbox.checked;
+                });
+                history[dateKey] = currentState;
+                localStorage.setItem(LOCAL_STORAGE_HISTORY_KEY, JSON.stringify(history));
+            } catch (e) {
+                console.error("Error saving to localStorage:", e);
+                showMessage("Your browser is blocking local storage. Progress will not be saved.");
+            }
+        }
+
+        function loadState() {
+            try {
+                // Load tasks
+                const storedTasks = localStorage.getItem(LOCAL_STORAGE_TASK_KEY);
+                tasks = storedTasks ? JSON.parse(storedTasks) : defaultTasks;
+
+                // Load history for the current date
+                const historyJSON = localStorage.getItem(LOCAL_STORAGE_HISTORY_KEY);
+                const history = historyJSON ? JSON.parse(historyJSON) : {};
+                const dateKey = currentDate.toISOString().slice(0, 10);
+                const currentState = history[dateKey] || {};
+
+                // Clear the current list and re-render
+                plannerList.innerHTML = '';
+                tasks.forEach(task => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'planner-item';
+                    listItem.dataset.taskId = task.id;
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'check-box';
+                    checkbox.checked = currentState[task.id] || false;
+
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'item-text';
+                    textSpan.textContent = task.text;
+
+                    // Edit Button
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'icon-btn edit-btn';
+                    editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232L18.766 8.766M16.924 3.076a2.5 2.5 0 113.536 3.536L14.732 18.732H11.2V15.207l9.17-9.17z"/></svg>`;
+
+                    // Delete Button
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'icon-btn delete-btn';
+                    deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16" /></svg>`;
+
+                    listItem.appendChild(checkbox);
+                    listItem.appendChild(textSpan);
+                    listItem.appendChild(editBtn);
+                    listItem.appendChild(deleteBtn);
+
+                    plannerList.appendChild(listItem);
                 });
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                // Update UI based on loaded state
+                const items = plannerList.querySelectorAll('.planner-item');
+                items.forEach(item => {
+                    const checkbox = item.querySelector('.check-box');
+                    if (checkbox.checked) {
+                        item.classList.add('completed');
+                    } else {
+                        item.classList.remove('completed');
+                    }
+                });
+                
+                // Update the date display
+                currentDateEl.textContent = formatDate(currentDate);
 
-                const result = await response.json();
-                if (result.success) {
-                    console.log("Google Sheet updated successfully!");
-                } else {
-                    showMessage("Failed to update Google Sheet: " + result.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage("An error occurred while connecting to the sheet.");
-            } finally {
-                loadingContainer.classList.add('hidden');
+            } catch (e) {
+                console.error("Error loading from localStorage:", e);
+                showMessage("Could not load saved data. Your browser may be blocking local storage.");
             }
         }
 
-        // Toggle task completion status and send to Node.js service
-        function toggleTaskStatus(item, isCompleted) {
+        function addTask() {
+            const taskText = newTaskInput.value.trim();
+            if (taskText) {
+                const newTaskId = `task_${Date.now()}`;
+                tasks.push({ id: newTaskId, text: taskText });
+                newTaskInput.value = '';
+                saveState();
+                loadState(); // Reload the list to display the new task
+            }
+        }
+
+        // Event listener for checkboxes and buttons
+        plannerList.addEventListener('click', (e) => {
+            const item = e.target.closest('.planner-item');
+            if (!item) return;
             const taskId = item.dataset.taskId;
 
-            if (isCompleted) {
-                item.classList.add('completed');
-            } else {
-                item.classList.remove('completed');
-            }
-
-            // Send update to Node.js service
-            updateGoogleSheet(taskId, isCompleted);
-        }
-
-        // Event listener for checkboxes
-        plannerList.addEventListener('change', (e) => {
-            const item = e.target.closest('.planner-item');
-            if (e.target.type === 'checkbox' && item) {
+            if (e.target.type === 'checkbox') {
                 const isCompleted = e.target.checked;
-                toggleTaskStatus(item, isCompleted);
+                if (isCompleted) {
+                    item.classList.add('completed');
+                } else {
+                    item.classList.remove('completed');
+                }
+                saveState();
+            } else if (e.target.closest('.delete-btn')) {
+                // Find the index of the task to be deleted
+                const taskIndex = tasks.findIndex(task => task.id === taskId);
+                if (taskIndex > -1) {
+                    tasks.splice(taskIndex, 1);
+                    saveState();
+                    loadState(); // Re-render the list
+                }
+            } else if (e.target.closest('.edit-btn')) {
+                const textSpan = item.querySelector('.item-text');
+                const checkbox = item.querySelector('.check-box');
+                const editBtn = item.querySelector('.edit-btn');
+                const deleteBtn = item.querySelector('.delete-btn');
+
+                // Create an input field to replace the text span
+                const editInput = document.createElement('input');
+                editInput.type = 'text';
+                editInput.value = textSpan.textContent;
+                editInput.className = 'flex-grow p-2 rounded-lg border-2 border-blue-500 focus:outline-none transition-colors';
+                
+                // Hide existing elements and show the input
+                textSpan.style.display = 'none';
+                checkbox.style.display = 'none';
+                editBtn.style.display = 'none';
+                deleteBtn.style.display = 'none';
+
+                item.insertBefore(editInput, textSpan);
+                editInput.focus();
+
+                const saveEdit = () => {
+                    const newTaskText = editInput.value.trim();
+                    if (newTaskText) {
+                        // Find the task and update its text
+                        const taskToUpdate = tasks.find(task => task.id === taskId);
+                        if (taskToUpdate) {
+                            taskToUpdate.text = newTaskText;
+                            saveState();
+                            loadState(); // Re-render the list with the updated task
+                        }
+                    } else {
+                        // If text is empty, delete the task
+                        const taskIndex = tasks.findIndex(task => task.id === taskId);
+                        if (taskIndex > -1) {
+                            tasks.splice(taskIndex, 1);
+                            saveState();
+                            loadState();
+                        }
+                    }
+                };
+                
+                // Save on blur or enter key
+                editInput.addEventListener('blur', saveEdit);
+                editInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        saveEdit();
+                    }
+                });
             }
         });
+        
+        // Navigation buttons
+        prevDayBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            loadState();
+        });
+
+        nextDayBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            loadState();
+        });
+
+        // Add task button
+        addTaskBtn.addEventListener('click', addTask);
+        newTaskInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+        
+        // Load the saved state when the page loads
+        window.onload = function() {
+            loadState();
+        };
     </script>
 </body>
 </html>
