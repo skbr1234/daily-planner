@@ -33,7 +33,7 @@
             border-radius: 16px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
-            position: relative; /* Needed for positioning delete button */
+            position: relative;
         }
         .planner-item.completed {
             background-color: #d1fae5;
@@ -92,6 +92,27 @@
         .icon-btn:hover {
             color: #1f2937;
         }
+
+        /* Footer pop-up styles */
+        .footer-popup {
+            position: fixed;
+            bottom: 6rem;
+            right: 2rem;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            display: none;
+        }
+
+        /* Info icon position */
+        #info-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 11; /* Ensure it's above the footer pop-up */
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
@@ -132,11 +153,25 @@
         </ul>
     </div>
 
-    <!-- Footer -->
-    <footer class="w-full max-w-xl text-center text-gray-500 text-sm mt-8">
-        © 2024 Daily Planner. All rights reserved.
-    </footer>
-
+    <!-- Info Icon -->
+    <button id="info-btn" class="icon-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 hover:text-gray-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    </button>
+    
+    <!-- Footer Pop-up -->
+    <div id="footer-popup" class="footer-popup">
+        <button id="close-footer-btn" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </button>
+        <footer class="text-center text-gray-500 text-xs">
+            © 2025 - <span id="current-year"></span> Daily Planner. All rights reserved. Made by <a href="https://kabeershah.com/" target="_blank" class="underline hover:text-blue-500">kabeershah.com</a>
+        </footer>
+    </div>
+    
     <script>
         const plannerList = document.getElementById('planner-list');
         const currentDateEl = document.getElementById('current-date');
@@ -148,6 +183,9 @@
         const modalOverlay = document.getElementById('modal-overlay');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseBtn = document.getElementById('modal-close-btn');
+        const infoBtn = document.getElementById('info-btn');
+        const footerPopup = document.getElementById('footer-popup');
+        const closeFooterBtn = document.getElementById('close-footer-btn');
 
         function showMessage(message) {
             modalMessage.textContent = message;
@@ -368,10 +406,21 @@
                 addTask();
             }
         });
+
+        // Toggle footer pop-up
+        infoBtn.addEventListener('click', () => {
+            footerPopup.style.display = 'block';
+        });
+
+        closeFooterBtn.addEventListener('click', () => {
+            footerPopup.style.display = 'none';
+        });
         
         // Load the saved state when the page loads
         window.onload = function() {
             loadState();
+            // Set the current year in the footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
         };
     </script>
 </body>
