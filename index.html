@@ -457,6 +457,10 @@
             loadState();
             // Set the current year in the footer
             document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // Health check API call
+            fetch('https://user-authentication-service-idnv.onrender.com/health')
+                .catch(error => console.log('Health check failed:', error));
         };
     </script>
 </body>
