@@ -331,14 +331,12 @@
         });
 
         // Local storage keys
-        const LOCAL_STORAGE_TASK_KEY = 'daily-planner-tasks';
-        const LOCAL_STORAGE_HISTORY_KEY = 'daily-planner-history';
-
-        // Predefined tasks for the first time the app is loaded
-        const defaultTasks = [];
+        const LOCAL_STORAGE_TASKS_BY_DATE_KEY = 'daily-planner-tasks-by-date';
+        const LOCAL_STORAGE_COMPLETION_KEY = 'daily-planner-completion';
 
         let currentDate = new Date();
-        let tasks = [];
+        let tasksByDate = {};
+        let completionStatus = {};
 
         function formatDate(date) {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -347,12 +345,10 @@
 
         function saveState() {
             try {
-                // Save the current list of tasks
-                localStorage.setItem(LOCAL_STORAGE_TASK_KEY, JSON.stringify(tasks));
+                // Save tasks by date
+                localStorage.setItem(LOCAL_STORAGE_TASKS_BY_DATE_KEY, JSON.stringify(tasksByDate));
 
-                // Save the completion history
-                const historyJSON = localStorage.getItem(LOCAL_STORAGE_HISTORY_KEY);
-                const history = historyJSON ? JSON.parse(historyJSON) : {};
+                // Save completion status
                 const dateKey = currentDate.toISOString().slice(0, 10);
                 const currentState = {};
                 const items = plannerList.querySelectorAll('.planner-item');
@@ -361,8 +357,8 @@
                     const checkbox = item.querySelector('.check-box');
                     currentState[taskId] = checkbox.checked;
                 });
-                history[dateKey] = currentState;
-                localStorage.setItem(LOCAL_STORAGE_HISTORY_KEY, JSON.stringify(history));
+                completionStatus[dateKey] = currentState;
+                localStorage.setItem(LOCAL_STORAGE_COMPLETION_KEY, JSON.stringify(completionStatus));
             } catch (e) {
                 console.error("Error saving to localStorage:", e);
                 showMessage("Your browser is blocking local storage. Progress will not be saved.");
@@ -371,19 +367,29 @@
 
         function loadState() {
             try {
-                // Load tasks
-                const storedTasks = localStorage.getItem(LOCAL_STORAGE_TASK_KEY);
-                tasks = storedTasks ? JSON.parse(storedTasks) : defaultTasks;
+                // Load tasks by date
+                const storedTasksByDate = localStorage.getItem(LOCAL_STORAGE_TASKS_BY_DATE_KEY);
+                if (storedTasksByDate && storedTasksByDate !== 'null') {
+                    tasksByDate = JSON.parse(storedTasksByDate);
+                } else {
+                    tasksByDate = {};
+                }
 
-                // Load history for the current date
-                const historyJSON = localStorage.getItem(LOCAL_STORAGE_HISTORY_KEY);
-                const history = historyJSON ? JSON.parse(historyJSON) : {};
+                // Load completion status
+                const storedCompletion = localStorage.getItem(LOCAL_STORAGE_COMPLETION_KEY);
+                if (storedCompletion && storedCompletion !== 'null') {
+                    completionStatus = JSON.parse(storedCompletion);
+                } else {
+                    completionStatus = {};
+                }
+
                 const dateKey = currentDate.toISOString().slice(0, 10);
-                const currentState = history[dateKey] || {};
+                const todaysTasks = tasksByDate[dateKey] || [];
+                const currentState = completionStatus[dateKey] || {};
 
                 // Clear the current list and re-render
                 plannerList.innerHTML = '';
-                tasks.forEach(task => {
+                todaysTasks.forEach(task => {
                     const listItem = document.createElement('li');
                     listItem.className = 'planner-item';
                     listItem.dataset.taskId = task.id;
@@ -446,8 +452,14 @@
         function addTask() {
             const taskText = newTaskInput.value.trim();
             if (taskText) {
+                const dateKey = currentDate.toISOString().slice(0, 10);
                 const newTaskId = `task_${Date.now()}`;
-                tasks.push({ id: newTaskId, text: taskText });
+                
+                if (!tasksByDate[dateKey]) {
+                    tasksByDate[dateKey] = [];
+                }
+                tasksByDate[dateKey].push({ id: newTaskId, text: taskText });
+                
                 newTaskInput.value = '';
                 saveState();
                 loadState(); // Reload the list to display the new task
