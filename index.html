@@ -4,8 +4,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Planner</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Performance Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    
+    <!-- SEO Meta Tags -->
+    <title>Daily Planner - Free Task Manager | Plan My Daily</title>
+    <meta name="description" content="Free online daily planner and task manager. Organize tasks with date navigation, offline storage, and simple editing. Start planning today!">
+    <meta name="author" content="Kabeer Shah">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://planmydaily.com/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Daily Planner - Free Task Manager">
+    <meta property="og:description" content="Free online daily planner and task manager. Organize tasks with date navigation and offline storage.">
+    <meta property="og:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630'><rect width='1200' height='630' fill='%23f3f4f6'/><text x='600' y='315' text-anchor='middle' font-size='48' fill='%23374151'>📅 Daily Planner</text></svg>">
+    <meta property="og:url" content="https://planmydaily.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Plan My Daily">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Daily Planner - Free Task Manager">
+    <meta name="twitter:description" content="Free online daily planner and task manager with offline storage.">
+    <meta name="twitter:image" content="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f3f4f6'/><text x='200' y='200' text-anchor='middle' font-size='80' fill='%23374151'>📅</text></svg>">
+    
+    <!-- Structured Data for AI Models -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Daily Planner",
+      "description": "Free online daily planner and task management application with date navigation and offline storage",
+      "url": "https://planmydaily.com/",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Daily task management",
+        "Date-based organization",
+        "Offline storage",
+        "Task editing and deletion",
+        "Responsive design"
+      ],
+      "creator": {
+        "@type": "Person",
+        "name": "Kabeer Shah",
+        "url": "https://kabeershah.com/"
+      }
+    }
+    </script>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KDJWFCD30G"></script>
@@ -20,6 +74,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        /* Skip link for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #000;
+            color: #fff;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 1000;
+        }
+        .skip-link:focus {
+            top: 6px;
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -68,6 +137,7 @@
             font-size: 1.25rem;
             font-weight: 600;
             margin-left: 1.25rem;
+            color: #1f2937;
         }
 
         .check-box {
@@ -142,73 +212,74 @@
 </head>
 
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <div class="modal-overlay" id="modal-overlay"></div>
-    <div class="custom-modal" id="custom-modal">
+    <div class="modal-overlay" id="modal-overlay" aria-hidden="true"></div>
+    <div class="custom-modal" id="custom-modal" role="dialog" aria-labelledby="modal-message" aria-hidden="true">
         <p id="modal-message" class="text-center font-semibold mb-4"></p>
-        <button id="modal-close-btn"
+        <button id="modal-close-btn" aria-label="Close modal"
             class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">OK</button>
     </div>
 
-    <div class="w-full max-w-xl bg-white p-8 rounded-3xl shadow-xl">
-        <div class="flex items-center justify-center mb-6">
-            <img src="favicon.svg" alt="Daily Planner" class="w-12 h-12 mr-3">
+    <main id="main-content" class="w-full max-w-xl bg-white p-8 rounded-3xl shadow-xl">
+        <header class="flex items-center justify-center mb-6">
+            <span class="text-5xl mr-3" role="img" aria-label="Calendar">📅</span>
             <h1 class="text-4xl font-extrabold text-center text-gray-800">Daily Planner</h1>
-        </div>
+        </header>
 
-        <!-- Date Navigation -->
-        <div class="flex justify-between items-center mb-6 px-4">
-            <button id="prev-day" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
+        <nav class="flex justify-between items-center mb-6 px-4" aria-label="Date navigation">
+            <button id="prev-day" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors" aria-label="Previous day">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+                    stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
-            <h2 id="current-date" class="text-2xl font-bold text-gray-700"></h2>
-            <button id="next-day" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
+            <h2 id="current-date" class="text-2xl font-bold text-gray-800"></h2>
+            <button id="next-day" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors" aria-label="Next day">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+                    stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
-        </div>
+        </nav>
 
-        <!-- Add Task Section -->
-        <div class="flex mb-6 px-4 gap-2">
-            <input id="new-task-input" type="text" placeholder="Add a new task..."
-                class="flex-grow p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition-colors">
-            <button id="add-task-btn"
-                class="p-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors">Add</button>
-        </div>
+        <section class="flex mb-6 px-4 gap-2" aria-label="Add new task">
+            <label for="new-task-input" class="sr-only">New task description</label>
+            <input id="new-task-input" type="text" placeholder="Add a new task..." aria-describedby="add-task-help"
+                class="flex-grow p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+            <button id="add-task-btn" aria-label="Add new task"
+                class="p-3 bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 text-white font-bold rounded-lg transition-colors">Add</button>
+            <div id="add-task-help" class="sr-only">Enter a task description and press Add or Enter to create a new task</div>
+        </section>
 
-        <!-- Planner list -->
-        <ul id="planner-list" class="planner-list">
-            <!-- Tasks will be dynamically added here -->
-        </ul>
-    </div>
+        <section aria-label="Task list">
+            <ul id="planner-list" class="planner-list" role="list">
+                <!-- Tasks will be dynamically added here -->
+            </ul>
+        </section>
+    </main>
 
     <!-- Info Icon -->
-    <button id="info-btn" class="icon-btn">
+    <button id="info-btn" class="icon-btn" aria-label="Show app information">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 hover:text-gray-600 transition-colors"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
     </button>
 
     <!-- Footer Pop-up -->
-    <div id="footer-popup" class="footer-popup">
-        <button id="close-footer-btn"
+    <div id="footer-popup" class="footer-popup" role="dialog" aria-labelledby="footer-title">
+        <button id="close-footer-btn" aria-label="Close information popup"
             class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd"
                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                     clip-rule="evenodd" />
             </svg>
         </button>
-        <footer class="text-center text-gray-500 text-xs">
-            © 2025 - <span id="current-year"></span> Daily Planner. All rights reserved. 
-            <!-- Made by <a href="https://kabeershah.com/" target="_blank" class="underline hover:text-blue-500">kabeershah.com</a> -->
+        <footer class="text-center text-gray-700 text-xs" id="footer-title">
+            © 2025 - <span id="current-year"></span> <strong>Plan My Daily</strong> - Free Online Daily Planner & Task Manager. All rights reserved.
         </footer>
     </div>
 
