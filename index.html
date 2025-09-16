@@ -264,12 +264,12 @@
             </button>
         </nav>
 
-        <section class="flex mb-6 px-4 gap-2" aria-label="Add new task">
+        <section class="flex flex-col sm:flex-row mb-6 px-4 gap-2" aria-label="Add new task">
             <label for="new-task-input" class="sr-only">New task description</label>
             <input id="new-task-input" type="text" placeholder="Add a new task..." aria-describedby="add-task-help"
                 class="flex-grow p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
             <button id="add-task-btn" aria-label="Add new task"
-                class="p-3 bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 text-white font-bold rounded-lg transition-colors">Add new task</button>
+                class="p-3 bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 text-white font-bold rounded-lg transition-colors w-full sm:w-auto">Add new task</button>
             <div id="add-task-help" class="sr-only">Enter a task description and press Add or Enter to create a new task</div>
         </section>
 
@@ -498,16 +498,18 @@
             e.preventDefault();
             if (draggedItem) {
                 // Update task order in array
+                const dateKey = currentDate.toISOString().slice(0, 10);
+                const todaysTasks = tasksByDate[dateKey] || [];
                 const items = Array.from(plannerList.querySelectorAll('.planner-item'));
                 const newOrder = items.map(item => item.dataset.taskId);
                 const reorderedTasks = [];
                 
                 newOrder.forEach(taskId => {
-                    const task = tasks.find(t => t.id === taskId);
+                    const task = todaysTasks.find(t => t.id === taskId);
                     if (task) reorderedTasks.push(task);
                 });
                 
-                tasks = reorderedTasks;
+                tasksByDate[dateKey] = reorderedTasks;
                 saveState();
             }
         });
@@ -548,9 +550,12 @@
                 saveState();
             } else if (e.target.closest('.delete-btn')) {
                 // Find the index of the task to be deleted
-                const taskIndex = tasks.findIndex(task => task.id === taskId);
+                const dateKey = currentDate.toISOString().slice(0, 10);
+                const todaysTasks = tasksByDate[dateKey] || [];
+                const taskIndex = todaysTasks.findIndex(task => task.id === taskId);
                 if (taskIndex > -1) {
-                    tasks.splice(taskIndex, 1);
+                    todaysTasks.splice(taskIndex, 1);
+                    tasksByDate[dateKey] = todaysTasks;
                     saveState();
                     loadState(); // Re-render the list
                 }
@@ -577,19 +582,23 @@
 
                 const saveEdit = () => {
                     const newTaskText = editInput.value.trim();
+                    const dateKey = currentDate.toISOString().slice(0, 10);
+                    const todaysTasks = tasksByDate[dateKey] || [];
                     if (newTaskText) {
                         // Find the task and update its text
-                        const taskToUpdate = tasks.find(task => task.id === taskId);
+                        const taskToUpdate = todaysTasks.find(task => task.id === taskId);
                         if (taskToUpdate) {
                             taskToUpdate.text = newTaskText;
+                            tasksByDate[dateKey] = todaysTasks;
                             saveState();
                             loadState(); // Re-render the list with the updated task
                         }
                     } else {
                         // If text is empty, delete the task
-                        const taskIndex = tasks.findIndex(task => task.id === taskId);
+                        const taskIndex = todaysTasks.findIndex(task => task.id === taskId);
                         if (taskIndex > -1) {
-                            tasks.splice(taskIndex, 1);
+                            todaysTasks.splice(taskIndex, 1);
+                            tasksByDate[dateKey] = todaysTasks;
                             saveState();
                             loadState();
                         }
