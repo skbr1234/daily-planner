@@ -2,7 +2,7 @@
   "name": "daily-planner",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://skbr1234.github.io/daily-planner",
+  "homepage": "https://planmydaily.com",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
