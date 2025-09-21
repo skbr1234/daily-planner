@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const TaskItem = ({ task, isCompleted, onToggle, onUpdate, onDelete }) => {
+const TaskItem = ({ task, isCompleted, onToggle, onUpdate, onDelete, onDragStart, onDragEnd, onDragOver, onDrop, isDragging }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editText, setEditText] = useState(task.text)
 
@@ -27,8 +27,15 @@ const TaskItem = ({ task, isCompleted, onToggle, onUpdate, onDelete }) => {
   }
 
   return (
-    <li className={`flex items-center justify-start p-5 mb-3 bg-white rounded-2xl shadow-md transition-all duration-300 planner-item ${isCompleted ? 'bg-green-50 text-green-600' : ''}`}>
-      <div className="cursor-grab p-2 mr-2 text-gray-400">⋮⋮</div>
+    <li 
+      className={`flex items-center justify-start p-5 mb-3 bg-white rounded-2xl shadow-md transition-all duration-300 planner-item ${isCompleted ? 'bg-green-50 text-green-600' : ''} ${isDragging ? 'opacity-50 rotate-1' : ''}`}
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
+      <div className="cursor-grab p-2 mr-2 text-gray-400 hover:text-gray-600" title="Drag to reorder">⋮⋮</div>
       
       <input
         type="checkbox"

@@ -429,6 +429,12 @@
                     dragHandle.className = 'drag-handle';
                     dragHandle.innerHTML = '⋮⋮';
                     dragHandle.setAttribute('aria-label', 'Drag to reorder task');
+                    
+                    // Make drag handle initiate drag on the parent item
+                    dragHandle.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        listItem.draggable = true;
+                    });
 
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
@@ -565,7 +571,7 @@
             if (!item) return;
             const taskId = item.dataset.taskId;
 
-            // Prevent drag when clicking on interactive elements
+            // Allow drag handle to work for dragging
             if (e.target.closest('.drag-handle')) {
                 return;
             }
