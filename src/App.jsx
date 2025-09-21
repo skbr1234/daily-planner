@@ -59,6 +59,12 @@ function App() {
 
   const completedCount = Object.values(currentState).filter(Boolean).length
 
+  useEffect(() => {
+    // Health check API call
+    fetch('https://user-authentication-service-idnv.onrender.com/health')
+      .catch(error => console.log('Health check failed:', error))
+  }, [])
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <a href="#main-content" className="skip-link">Skip to main content</a>
