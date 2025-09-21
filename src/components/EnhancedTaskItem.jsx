@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const EnhancedTaskItem = ({ task, isCompleted, onToggle, onUpdate, onDelete }) => {
+const EnhancedTaskItem = ({ task, isCompleted, onToggle, onUpdate, onDelete, onDragStart, onDragEnd, onDragOver, onDrop, isDragging }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editText, setEditText] = useState(task.text)
 
@@ -43,13 +43,35 @@ const EnhancedTaskItem = ({ task, isCompleted, onToggle, onUpdate, onDelete }) =
   const isMultiDay = task.originalDate && task.dueDate
   const isOriginalDate = !task.originalDate
 
+  const handleDragStart = (e) => {
+    onDragStart(e, task)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    onDragOver(e)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    onDrop(e, task)
+  }
+
   return (
-    <li className={`
-      flex items-center justify-start p-4 mb-3 bg-white rounded-xl shadow-sm transition-all duration-300 border-l-4
-      ${task.priority ? priorityColors[task.priority] : 'border-l-gray-300'}
-      ${isCompleted ? 'opacity-75' : ''}
-      ${isOverdue ? 'border-l-red-600 bg-red-50' : ''}
-    `}>
+    <li 
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      className={`
+        flex items-center justify-start p-4 mb-3 bg-white rounded-xl shadow-sm transition-all duration-300 border-l-4
+        ${task.priority ? priorityColors[task.priority] : 'border-l-gray-300'}
+        ${isCompleted ? 'opacity-75' : ''}
+        ${isOverdue ? 'border-l-red-600 bg-red-50' : ''}
+        ${isDragging ? 'opacity-50 transform rotate-1' : ''}
+      `
+    }>
       <div className="cursor-grab p-1 mr-2 text-gray-400 text-sm">⋮⋮</div>
       
       <input

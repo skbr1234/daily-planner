@@ -34,20 +34,7 @@ const TaskList = ({ tasks, completionStatus, onToggleTask, onUpdateTask, onDelet
   return (
     <section aria-label="Task list">
       <ul className="list-none p-0 w-full" role="list">
-        {tasks
-          .sort((a, b) => {
-            // Sort by priority (high -> medium -> low), then by time
-            const priorityOrder = { high: 3, medium: 2, low: 1 }
-            const aPriority = priorityOrder[a.priority] || 2
-            const bPriority = priorityOrder[b.priority] || 2
-            
-            if (aPriority !== bPriority) return bPriority - aPriority
-            if (a.time && b.time) return a.time.localeCompare(b.time)
-            if (a.time) return -1
-            if (b.time) return 1
-            return 0
-          })
-          .map((task) => (
+        {tasks.map((task) => (
             <EnhancedTaskItem
               key={task.id}
               task={task}
@@ -55,6 +42,11 @@ const TaskList = ({ tasks, completionStatus, onToggleTask, onUpdateTask, onDelet
               onToggle={(completed) => onToggleTask(task.id, completed)}
               onUpdate={(newText) => onUpdateTask(task.id, newText)}
               onDelete={() => onDeleteTask(task.id)}
+              onDragStart={(e) => handleDragStart(e, task.id)}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, task.id)}
+              isDragging={draggedItem === task.id}
             />
           ))}
       </ul>
