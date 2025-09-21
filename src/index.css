@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+}
+.skip-link:focus {
+  top: 6px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.planner-item {
+  cursor: grab;
+}
+.planner-item:active {
+  cursor: grabbing;
+}
+.planner-item.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+@keyframes scroll-left {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.marquee-scroll {
+  animation: scroll-left 40s linear infinite;
+  white-space: nowrap;
+}
