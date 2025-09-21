@@ -28,7 +28,11 @@ function App() {
   const addTask = (taskText) => {
     const newTaskId = `task_${Date.now()}`
     const newTasks = [...todaysTasks, { id: newTaskId, text: taskText }]
-    setTasksByDate(prev => ({ ...prev, [dateKey]: newTasks }))
+    setTasksByDate(prev => {
+      const updated = { ...prev, [dateKey]: newTasks }
+      console.log('Adding task, updated data:', updated)
+      return updated
+    })
   }
 
   const updateTask = (taskId, newText) => {
@@ -74,6 +78,12 @@ function App() {
     fetch('https://user-authentication-service-idnv.onrender.com/health')
       .catch(error => console.log('Health check failed:', error))
   }, [])
+
+  // Debug: Log data on load
+  useEffect(() => {
+    console.log('Tasks by date:', tasksByDate)
+    console.log('Completion status:', completionStatus)
+  }, [tasksByDate, completionStatus])
 
   return (
     <div className="bg-gray-100 min-h-screen">

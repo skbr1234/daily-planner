@@ -13,12 +13,21 @@ export function useLocalStorage(key, initialValue) {
 
   const setValue = (value) => {
     try {
-      setStoredValue(value)
-      window.localStorage.setItem(key, JSON.stringify(value))
+      const valueToStore = value instanceof Function ? value(storedValue) : value
+      setStoredValue(valueToStore)
+      window.localStorage.setItem(key, JSON.stringify(valueToStore))
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error)
     }
   }
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(storedValue))
+    } catch (error) {
+      console.error(`Error syncing localStorage key "${key}":`, error)
+    }
+  }, [key, storedValue])
 
   return [storedValue, setValue]
 }
