@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import QuoteMarquee from './components/QuoteMarquee'
 import DateNavigation from './components/DateNavigation'
+import EnhancedDateNavigation from './components/EnhancedDateNavigation'
 import TaskInput from './components/TaskInput'
 import TaskList from './components/TaskList'
 import Modal from './components/Modal'
 import InfoButton from './components/InfoButton'
+import MiniCalendar from './components/MiniCalendar'
+import WeekView from './components/WeekView'
+import ViewToggle from './components/ViewToggle'
 import { useLocalStorage } from './hooks/useLocalStorage'
 
 function App() {
@@ -12,6 +16,7 @@ function App() {
   const [tasksByDate, setTasksByDate] = useLocalStorage('daily-planner-tasks-by-date', {})
   const [completionStatus, setCompletionStatus] = useLocalStorage('daily-planner-completion', {})
   const [modal, setModal] = useState({ show: false, message: '' })
+  const [currentView, setCurrentView] = useState('day')
 
   const dateKey = currentDate.toISOString().slice(0, 10)
   const todaysTasks = tasksByDate[dateKey] || []
@@ -56,6 +61,11 @@ function App() {
   }
 
   const goToToday = () => setCurrentDate(new Date())
+  
+  const handleDateSelect = (date) => {
+    setCurrentDate(date)
+    if (currentView !== 'day') setCurrentView('day')
+  }
 
   const completedCount = Object.values(currentState).filter(Boolean).length
 
@@ -78,25 +88,53 @@ function App() {
             <h1 className="text-4xl font-extrabold text-center text-gray-800">Daily Planner</h1>
           </header>
 
-          <DateNavigation 
-            currentDate={currentDate}
-            onPrevDay={() => navigateDate(-1)}
-            onNextDay={() => navigateDate(1)}
-            onGoToday={goToToday}
-            taskCount={todaysTasks.length}
-            completedCount={completedCount}
+          <ViewToggle 
+            currentView={currentView}
+            onViewChange={setCurrentView}
           />
 
-          <TaskInput onAddTask={addTask} />
+          {currentView === 'day' && (
+            <EnhancedDateNavigation 
+              currentDate={currentDate}
+              onPrevDay={() => navigateDate(-1)}
+              onNextDay={() => navigateDate(1)}
+              onGoToday={goToToday}
+              onDateSelect={handleDateSelect}
+              taskCount={todaysTasks.length}
+              completedCount={completedCount}
+            />
+          )}
 
-          <TaskList 
-            tasks={todaysTasks}
-            completionStatus={currentState}
-            onToggleTask={toggleTask}
-            onUpdateTask={updateTask}
-            onDeleteTask={deleteTask}
-            onReorderTasks={reorderTasks}
-          />
+          {currentView === 'day' && (
+            <>
+              <TaskInput onAddTask={addTask} />
+              <TaskList 
+                tasks={todaysTasks}
+                completionStatus={currentState}
+                onToggleTask={toggleTask}
+                onUpdateTask={updateTask}
+                onDeleteTask={deleteTask}
+                onReorderTasks={reorderTasks}
+              />
+            </>
+          )}
+
+          {currentView === 'week' && (
+            <WeekView 
+              currentDate={currentDate}
+              tasksByDate={tasksByDate}
+              completionStatus={completionStatus}
+              onDateSelect={handleDateSelect}
+            />
+          )}
+
+          {currentView === 'calendar' && (
+            <MiniCalendar 
+              currentDate={currentDate}
+              tasksByDate={tasksByDate}
+              onDateSelect={handleDateSelect}
+            />
+          )}
         </main>
       </div>
 

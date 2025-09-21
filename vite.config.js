@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/daily-planner/',
+  base: process.env.NODE_ENV === 'production' ? '/daily-planner/' : '/',
   build: {
     outDir: 'dist'
   }
