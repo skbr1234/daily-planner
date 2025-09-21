@@ -16,17 +16,7 @@ const EnhancedDateNavigation = ({
     return date.toLocaleDateString('en-US', options)
   }
 
-  const navigateWeek = (direction) => {
-    const newDate = new Date(currentDate)
-    newDate.setDate(newDate.getDate() + (direction * 7))
-    onDateSelect(newDate)
-  }
 
-  const navigateMonth = (direction) => {
-    const newDate = new Date(currentDate)
-    newDate.setMonth(newDate.getMonth() + direction)
-    onDateSelect(newDate)
-  }
 
   const handleDatePickerChange = (e) => {
     const selectedDate = new Date(e.target.value)
@@ -40,43 +30,6 @@ const EnhancedDateNavigation = ({
 
   return (
     <nav className="mb-6 px-4" aria-label="Enhanced date navigation">
-      {/* Quick Navigation Buttons */}
-      <div className="flex justify-center gap-2 mb-4">
-        <button 
-          onClick={() => navigateMonth(-1)}
-          className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-          title="Previous Month"
-        >
-          ← Month
-        </button>
-        <button 
-          onClick={() => navigateWeek(-1)}
-          className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-          title="Previous Week"
-        >
-          ← Week
-        </button>
-        <button 
-          onClick={onGoToday}
-          className="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full transition-colors font-medium"
-        >
-          Today
-        </button>
-        <button 
-          onClick={() => navigateWeek(1)}
-          className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-          title="Next Week"
-        >
-          Week →
-        </button>
-        <button 
-          onClick={() => navigateMonth(1)}
-          className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-          title="Next Month"
-        >
-          Month →
-        </button>
-      </div>
 
       {/* Main Date Navigation */}
       <div className="flex justify-between items-center mb-3">
