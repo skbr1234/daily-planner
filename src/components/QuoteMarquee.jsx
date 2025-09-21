@@ -11,24 +11,31 @@ const QuoteMarquee = () => {
       
       if (lastQuoteDate !== today) {
         try {
-          const response = await fetch('https://api.quotable.io/random?tags=motivational,inspirational,success')
-          const data = await response.json()
-          const newQuote = { text: data.content, author: data.author }
-          
-          const quotes = JSON.parse(localStorage.getItem('daily-planner-quotes') || '[]')
-          quotes.push({ ...newQuote, date: today })
-          localStorage.setItem('daily-planner-quotes', JSON.stringify(quotes))
-          localStorage.setItem('daily-planner-last-quote-date', today)
+          const response = await fetch('https://zenquotes.io/api/random')
+          if (response.ok) {
+            const data = await response.json()
+            const newQuote = { text: data[0].q, author: data[0].a }
+            
+            const quotes = JSON.parse(localStorage.getItem('daily-planner-quotes') || '[]')
+            quotes.push({ ...newQuote, date: today })
+            localStorage.setItem('daily-planner-quotes', JSON.stringify(quotes))
+            localStorage.setItem('daily-planner-last-quote-date', today)
+          }
         } catch (error) {
-          console.error('Failed to fetch quote:', error)
+          console.log('Quote API failed')
+          // Disable quotes if API consistently fails
+          localStorage.setItem('daily-planner-quotes-disabled', 'true')
         }
       }
       
-      const quotes = JSON.parse(localStorage.getItem('daily-planner-quotes') || '[]')
-      if (quotes.length > 0) {
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)]
-        setQuote(`"${randomQuote.text}" — ${randomQuote.author}`)
-        setIsVisible(true)
+      const quotesDisabled = localStorage.getItem('daily-planner-quotes-disabled')
+      if (!quotesDisabled) {
+        const quotes = JSON.parse(localStorage.getItem('daily-planner-quotes') || '[]')
+        if (quotes.length > 0) {
+          const randomQuote = quotes[Math.floor(Math.random() * quotes.length)]
+          setQuote(`"${randomQuote.text}" — ${randomQuote.author}`)
+          setIsVisible(true)
+        }
       }
     }
 

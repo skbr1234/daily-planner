@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import QuoteMarquee from './components/QuoteMarquee'
-import DateNavigation from './components/DateNavigation'
-import EnhancedDateNavigation from './components/EnhancedDateNavigation'
 import TaskInput from './components/TaskInput'
 import TaskList from './components/TaskList'
 import Modal from './components/Modal'
 import InfoButton from './components/InfoButton'
 import MiniCalendar from './components/MiniCalendar'
 import WeekView from './components/WeekView'
-import ViewToggle from './components/ViewToggle'
+import CollapsibleNavigation from './components/CollapsibleNavigation'
 import { useLocalStorage } from './hooks/useLocalStorage'
 
 function App() {
@@ -89,22 +87,19 @@ function App() {
     <div className="bg-gray-100 min-h-screen">
       <a href="#main-content" className="skip-link">Skip to main content</a>
       
-      <QuoteMarquee />
+      {/* <QuoteMarquee /> */}
       
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="flex flex-col items-center p-4 pt-8">
         <main id="main-content" className="w-full max-w-xl bg-white p-8 rounded-3xl shadow-xl">
           <header className="flex items-center justify-center mb-6">
             <span className="text-5xl mr-3" role="img" aria-label="Calendar">📅</span>
             <h1 className="text-4xl font-extrabold text-center text-gray-800">Daily Planner</h1>
           </header>
 
-          <ViewToggle 
-            currentView={currentView}
-            onViewChange={setCurrentView}
-          />
-
           {currentView === 'day' && (
-            <EnhancedDateNavigation 
+            <CollapsibleNavigation 
+              currentView={currentView}
+              onViewChange={setCurrentView}
               currentDate={currentDate}
               onPrevDay={() => navigateDate(-1)}
               onNextDay={() => navigateDate(1)}
@@ -113,6 +108,17 @@ function App() {
               taskCount={todaysTasks.length}
               completedCount={completedCount}
             />
+          )}
+
+          {currentView !== 'day' && (
+            <div className="flex justify-center mb-4">
+              <button 
+                onClick={() => setCurrentView('day')}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+              >
+                ← Back to Day View
+              </button>
+            </div>
           )}
 
           {currentView === 'day' && (
