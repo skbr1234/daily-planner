@@ -3,6 +3,7 @@ import QuoteMarquee from './components/QuoteMarquee'
 import EnhancedTaskInput from './components/EnhancedTaskInput'
 import TaskList from './components/TaskList'
 import TaskFilter from './components/TaskFilter'
+import OldTasks from './components/OldTasks'
 import Modal from './components/Modal'
 import InfoButton from './components/InfoButton'
 import MiniCalendar from './components/MiniCalendar'
@@ -175,6 +176,13 @@ function App() {
     }
   }
 
+  const toggleOldTask = (taskDate, taskId, completed) => {
+    setCompletionStatus(prev => ({
+      ...prev,
+      [taskDate]: { ...prev[taskDate], [taskId]: completed }
+    }))
+  }
+
   const reorderTasks = (newOrder) => {
     setTasksByDate(prev => ({ ...prev, [dateKey]: newOrder }))
   }
@@ -285,6 +293,12 @@ function App() {
                 onUpdateTask={updateTask}
                 onDeleteTask={deleteTask}
                 onReorderTasks={reorderTasks}
+              />
+              <OldTasks 
+                tasksByDate={tasksByDate}
+                completionStatus={completionStatus}
+                onDateSelect={handleDateSelect}
+                onToggleTask={toggleOldTask}
               />
             </>
           )}
