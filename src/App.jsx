@@ -232,8 +232,11 @@ function App() {
 
   useEffect(() => {
     // Health check API call
-    fetch('https://user-authentication-service-idnv.onrender.com/health')
-      .catch(error => console.log('Health check failed:', error))
+    const healthCheckUrl = import.meta.env.VITE_HEALTH_CHECK_URL
+    if (healthCheckUrl) {
+      fetch(healthCheckUrl)
+        .catch(error => console.log('Health check failed:', error))
+    }
   }, [])
 
   // Debug: Log data on load

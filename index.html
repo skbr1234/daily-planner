@@ -62,12 +62,15 @@
     </script>
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KDJWFCD30G"></script>
+    <script>
+        window.GA_MEASUREMENT_ID = '%VITE_GA_MEASUREMENT_ID%';
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-KDJWFCD30G');
+        gtag('config', window.GA_MEASUREMENT_ID);
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -75,5 +78,11 @@
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Feedback Widget -->
+    <div id="feedbackbox-widget" 
+         data-form="%VITE_FEEDBACK_FORM_ID%" 
+         data-entry="%VITE_FEEDBACK_ENTRY_ID%"></div>
+    <script src="https://feedback-box.planmydaily.com/widget.js"></script>
 </body>
 </html>
