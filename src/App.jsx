@@ -230,15 +230,6 @@ function App() {
 
   const completedCount = Object.values(currentState).filter(Boolean).length
 
-  useEffect(() => {
-    // Health check API call
-    const healthCheckUrl = import.meta.env.VITE_HEALTH_CHECK_URL
-    if (healthCheckUrl) {
-      fetch(healthCheckUrl)
-        .catch(error => console.log('Health check failed:', error))
-    }
-  }, [])
-
   // Debug: Log data on load
   useEffect(() => {
     console.log('Tasks by date:', tasksByDate)
